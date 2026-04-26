@@ -1,0 +1,4 @@
+let mods=[];
+async function load(){const r=await fetch('mods.json?t='+Date.now());mods=await r.json();render();}
+function render(){const q=document.getElementById('search').value.toLowerCase();const box=document.getElementById('mods');box.innerHTML='';mods.filter(m=>m.name.toLowerCase().includes(q)).forEach(m=>{box.innerHTML+=`<div class='card'><img src='${m.image||"https://picsum.photos/500/300"}'><div class='content'><h3>${m.name}</h3><p>Type: ${m.type}</p><p>By: ${m.by}</p><a class='btn' href='${m.download}' target='_blank'>Download</a></div></div>`})}
+document.getElementById('search').addEventListener('input',render);load();setInterval(load,30000);
