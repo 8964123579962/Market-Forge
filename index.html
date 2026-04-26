@@ -1,52 +1,176 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Market Forge</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,Arial,sans-serif;background:#0b0b0b;color:#fff}header{position:sticky;top:0;z-index:10;background:rgba(10,10,10,.85);backdrop-filter:blur(8px);border-bottom:1px solid #2a2a2a}.nav{max-width:1280px;margin:auto;padding:18px 22px;display:flex;justify-content:space-between;align-items:center}.logo{font-size:30px;font-weight:900;color:#ffc400;letter-spacing:1px}.menu{display:flex;gap:18px;color:#ccc}.hero{max-width:1280px;margin:auto;padding:72px 22px 38px;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center}.hero h1{font-size:56px;line-height:1.05;margin-bottom:16px}.hero p{color:#bdbdbd;font-size:18px;max-width:700px}.cta{margin-top:22px;display:flex;gap:14px}.btn{padding:14px 18px;border-radius:14px;text-decoration:none;font-weight:800}.primary{background:#ffc400;color:#111}.secondary{background:#1c1c1c;color:#fff;border:1px solid #333}.heroCard{background:linear-gradient(145deg,#171717,#111);border:1px solid #2b2b2b;border-radius:24px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.35)}.stat{padding:14px;background:#121212;border:1px solid #2c2c2c;border-radius:18px;margin-bottom:12px}.wrap{max-width:1280px;margin:auto;padding:18px 22px 60px}.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}.search{flex:1;min-width:220px;padding:14px;border:none;border-radius:14px;background:#151515;color:#fff;border:1px solid #2d2d2d}.chip{padding:12px 16px;border-radius:999px;background:#151515;border:1px solid #2c2c2c;color:#ddd;cursor:pointer}.chip.active{background:#ffc400;color:#111;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}.card{background:linear-gradient(180deg,#171717,#111);border:1px solid #2a2a2a;border-radius:22px;overflow:hidden;transition:.18s transform,.18s border}.card:hover{transform:translateY(-4px);border-color:#ffc400}.thumb{height:170px;background:#222;background-size:cover;background-position:center}.content{padding:16px}.title{font-size:20px;font-weight:800;margin-bottom:8px}.meta{color:#c8c8c8;font-size:14px;margin-bottom:6px}.download{display:inline-block;margin-top:10px;padding:12px 14px;background:#ffc400;color:#111;text-decoration:none;border-radius:12px;font-weight:800}.sectionTitle{font-size:28px;font-weight:900;margin:10px 0 18px}.footer{border-top:1px solid #222;color:#888;padding:28px 22px;text-align:center}.badge{display:inline-block;padding:8px 10px;background:#1a1a1a;border:1px solid #2b2b2b;border-radius:999px;color:#ffc400;font-size:12px;font-weight:800;margin-bottom:14px}@media(max-width:900px){.hero{grid-template-columns:1fr}.hero h1{font-size:42px}.menu{display:none}}
+body{
+margin:0;
+font-family:Arial;
+background:#0b0b0b;
+color:#fff;
+}
+
+header{
+padding:20px;
+background:#000;
+border-bottom:3px solid #f7c600;
+position:sticky;
+top:0;
+z-index:10;
+}
+
+h1{
+color:#f7c600;
+margin:0;
+}
+
+.search{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:10px;
+border:none;
+background:#1a1a1a;
+color:#fff;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:16px;
+padding:20px;
+}
+
+.card{
+background:#151515;
+border:1px solid #2a2a2a;
+border-radius:16px;
+overflow:hidden;
+transition:0.2s;
+}
+
+.card:hover{
+transform:translateY(-3px);
+border-color:#f7c600;
+}
+
+.thumb{
+height:160px;
+background-size:cover;
+background-position:center;
+background-color:#222;
+}
+
+.content{
+padding:14px;
+}
+
+.title{
+font-weight:800;
+margin-bottom:6px;
+}
+
+.meta{
+font-size:13px;
+color:#bbb;
+margin-bottom:4px;
+}
+
+.btn{
+display:inline-block;
+margin-top:10px;
+padding:10px 12px;
+background:#f7c600;
+color:#111;
+text-decoration:none;
+border-radius:10px;
+font-weight:800;
+}
+
+.badge{
+display:inline-block;
+padding:6px 10px;
+background:#1c1c1c;
+border:1px solid #333;
+border-radius:999px;
+font-size:12px;
+color:#f7c600;
+margin:10px 0;
+}
 </style>
 </head>
+
 <body>
-<header><div class='nav'><div class='logo'>MARKET FORGE</div><div class='menu'><div>Home</div><div>Addons</div><div>Textures</div><div>Discord</div></div></div></header>
-<section class='hero'>
-<div>
-<div class='badge'>PREMIUM MOD MARKET</div>
-<h1>Modern Minecraft Downloads Marketplace</h1>
-<p>Discover curated addons, texture packs, worlds, and skins in a premium BN Craft-inspired experience with Market Forge branding.</p>
-<div class='cta'><a class='btn primary' href='#catalog'>Browse Mods</a><a class='btn secondary' href='#'>Join Discord</a></div>
-</div>
-<div class='heroCard'>
-<div class='stat'><strong>12,000+</strong><br>Downloads</div>
-<div class='stat'><strong>300+</strong><br>Premium Mods</div>
-<div class='stat'><strong>Fast</strong><br>Direct Access</div>
-</div>
-</section>
-<section class='wrap' id='catalog'>
-<div class='sectionTitle'>Browse Catalog</div>
-<div class='toolbar'>
-<input id='search' class='search' placeholder='Search mods...'>
-<div class='chip active' onclick="setFilter('All',this)">All</div>
-<div class='chip' onclick="setFilter('Addon',this)">Addons</div>
-<div class='chip' onclick="setFilter('Texture Pack',this)">Textures</div>
-<div class='chip' onclick="setFilter('World',this)">Worlds</div>
-<div class='chip' onclick="setFilter('Skin Pack',this)">Skins</div>
-</div>
-<div id='grid' class='grid'></div>
-</section>
-<div class='footer'>© Market Forge • Built for modern creators</div>
+
+<header>
+<h1>MARKET FORGE</h1>
+<input class="search" id="search" placeholder="Search mods...">
+<div class="badge">Live Marketplace</div>
+</header>
+
+<div class="grid" id="grid"></div>
+
 <script>
-const mods=[
-{name:'Action Stuff',type:'Addon',by:'Market Forge',img:'https://picsum.photos/600/400?1',link:'#'},
-{name:'Fainting Goats',type:'Addon',by:'Market Forge',img:'https://picsum.photos/600/400?2',link:'#'},
-{name:'RTX Gold Pack',type:'Texture Pack',by:'@yashofree',img:'https://picsum.photos/600/400?3',link:'#'},
-{name:'Sky Kingdom',type:'World',by:'Market Forge',img:'https://picsum.photos/600/400?4',link:'#'},
-{name:'Ninja Fighters',type:'Skin Pack',by:'@yashofree',img:'https://picsum.photos/600/400?5',link:'#'}
-];
-let filter='All';
-function setFilter(v,el){filter=v;document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');render();}
-function render(){const q=document.getElementById('search').value.toLowerCase();const grid=document.getElementById('grid');grid.innerHTML='';mods.filter(m=>(filter==='All'||m.type===filter)&&m.name.toLowerCase().includes(q)).forEach(m=>{grid.innerHTML+=`<div class='card'><div class='thumb' style='background-image:url(${m.img})'></div><div class='content'><div class='title'>${m.name}</div><div class='meta'>Type: ${m.type}</div><div class='meta'>By: ${m.by}</div><a class='download' href='${m.link}'>Download</a></div></div>`})}
-document.getElementById('search').addEventListener('input',render);render();
+
+let mods = [];
+
+// LIVE FETCH FROM NETLIFY FUNCTION
+async function loadMods(){
+try {
+const res = await fetch("/.netlify/functions/mods");
+mods = await res.json();
+render();
+} catch(e){
+console.log("error loading mods", e);
+}
+}
+
+function render(){
+
+const q = document.getElementById("search").value.toLowerCase();
+const grid = document.getElementById("grid");
+
+grid.innerHTML = "";
+
+// empty state
+if(mods.length === 0){
+grid.innerHTML = "<p style='padding:20px;color:#aaa'>No mods available</p>";
+return;
+}
+
+mods
+.filter(m => m.name.toLowerCase().includes(q))
+.forEach(m => {
+
+grid.innerHTML += `
+<div class="card">
+<div class="thumb" style="background-image:url('${m.image || "https://via.placeholder.com/400"}')"></div>
+
+<div class="content">
+<div class="title">${m.name}</div>
+<div class="meta">Type: ${m.type}</div>
+<div class="meta">By: ${m.by}</div>
+
+<a class="btn" href="${m.download}" target="_blank">Download</a>
+</div>
+</div>
+`;
+
+});
+
+}
+
+document.getElementById("search").addEventListener("input", render);
+
+loadMods();
+
+// auto refresh (sync)
+setInterval(loadMods, 15000);
+
 </script>
+
 </body>
 </html>
