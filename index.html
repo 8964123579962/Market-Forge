@@ -3,173 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market Forge</title>
-
+<title>Marketplace Mods</title>
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#0b0b0b;
-color:#fff;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
 
-header{
-padding:20px;
-background:#000;
-border-bottom:3px solid #f7c600;
-position:sticky;
-top:0;
-z-index:10;
-}
+    body {
+        background: #0d1117;
+        color: white;
+        padding: 20px;
+    }
 
-h1{
-color:#f7c600;
-margin:0;
-}
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #58a6ff;
+    }
 
-.search{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:10px;
-border:none;
-background:#1a1a1a;
-color:#fff;
-}
+    .search-box {
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-gap:16px;
-padding:20px;
-}
+    input {
+        width: 80%;
+        max-width: 500px;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        outline: none;
+        font-size: 16px;
+    }
 
-.card{
-background:#151515;
-border:1px solid #2a2a2a;
-border-radius:16px;
-overflow:hidden;
-transition:0.2s;
-}
+    .filters {
+        text-align: center;
+        margin-bottom: 25px;
+    }
 
-.card:hover{
-transform:translateY(-3px);
-border-color:#f7c600;
-}
+    .filters button {
+        background: #21262d;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        margin: 5px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
 
-.thumb{
-height:160px;
-background-size:cover;
-background-position:center;
-background-color:#222;
-}
+    .filters button:hover {
+        background: #58a6ff;
+    }
 
-.content{
-padding:14px;
-}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #161b22;
+        border-radius: 10px;
+        overflow: hidden;
+    }
 
-.title{
-font-weight:800;
-margin-bottom:6px;
-}
+    th, td {
+        padding: 14px;
+        text-align: center;
+        border-bottom: 1px solid #30363d;
+    }
 
-.meta{
-font-size:13px;
-color:#bbb;
-margin-bottom:4px;
-}
+    th {
+        background: #21262d;
+    }
 
-.btn{
-display:inline-block;
-margin-top:10px;
-padding:10px 12px;
-background:#f7c600;
-color:#111;
-text-decoration:none;
-border-radius:10px;
-font-weight:800;
-}
+    a {
+        color: #58a6ff;
+        text-decoration: none;
+    }
 
-.badge{
-display:inline-block;
-padding:6px 10px;
-background:#1c1c1c;
-border:1px solid #333;
-border-radius:999px;
-font-size:12px;
-color:#f7c600;
-margin:10px 0;
-}
+    a:hover {
+        text-decoration: underline;
+    }
+
+    @media(max-width:768px){
+        table {
+            font-size: 12px;
+        }
+    }
 </style>
 </head>
-
 <body>
 
-<header>
-<h1>MARKET FORGE</h1>
-<input class="search" id="search" placeholder="Search mods...">
-<div class="badge">Live Marketplace</div>
-</header>
+<h1>Marketplace Mods</h1>
 
-<div class="grid" id="grid"></div>
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search mods...">
+</div>
+
+<div class="filters">
+    <button onclick="filterMods('ALL')">ALL</button>
+    <button onclick="filterMods('ADD-ONS')">ADD-ONS</button>
+    <button onclick="filterMods('TEXTURES')">TEXTURES</button>
+    <button onclick="filterMods('WORLDS')">WORLDS</button>
+    <button onclick="filterMods('SKINS')">SKINS</button>
+</div>
+
+<table id="modsTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Download</th>
+            <th>Marketplace</th>
+        </tr>
+    </thead>
+    <tbody id="modsBody">
+        <tr data-type="ADD-ONS">
+            <td>Dragon Expansion</td>
+            <td>ADD-ONS</td>
+            <td>25MB</td>
+            <td><a href="#">Download</a></td>
+            <td><a href="#">Marketplace</a></td>
+        </tr>
+
+        <tr data-type="TEXTURES">
+            <td>Ultra HD Texture Pack</td>
+            <td>TEXTURES</td>
+            <td>45MB</td>
+            <td><a href="#">Download</a></td>
+            <td><a href="#">Marketplace</a></td>
+        </tr>
+
+        <tr data-type="WORLDS">
+            <td>Survival Kingdom</td>
+            <td>WORLDS</td>
+            <td>80MB</td>
+            <td><a href="#">Download</a></td>
+            <td><a href="#">Marketplace</a></td>
+        </tr>
+
+        <tr data-type="SKINS">
+            <td>Anime Skin Pack</td>
+            <td>SKINS</td>
+            <td>12MB</td>
+            <td><a href="#">Download</a></td>
+            <td><a href="#">Marketplace</a></td>
+        </tr>
+    </tbody>
+</table>
 
 <script>
+const searchInput = document.getElementById("searchInput");
 
-let mods = [];
+searchInput.addEventListener("keyup", function () {
+    const filter = searchInput.value.toLowerCase();
+    const rows = document.querySelectorAll("#modsBody tr");
 
-// LIVE FETCH FROM NETLIFY FUNCTION
-async function loadMods(){
-try {
-const res = await fetch("/.netlify/functions/mods");
-mods = await res.json();
-render();
-} catch(e){
-console.log("error loading mods", e);
-}
-}
-
-function render(){
-
-const q = document.getElementById("search").value.toLowerCase();
-const grid = document.getElementById("grid");
-
-grid.innerHTML = "";
-
-// empty state
-if(mods.length === 0){
-grid.innerHTML = "<p style='padding:20px;color:#aaa'>No mods available</p>";
-return;
-}
-
-mods
-.filter(m => m.name.toLowerCase().includes(q))
-.forEach(m => {
-
-grid.innerHTML += `
-<div class="card">
-<div class="thumb" style="background-image:url('${m.image || "https://via.placeholder.com/400"}')"></div>
-
-<div class="content">
-<div class="title">${m.name}</div>
-<div class="meta">Type: ${m.type}</div>
-<div class="meta">By: ${m.by}</div>
-
-<a class="btn" href="${m.download}" target="_blank">Download</a>
-</div>
-</div>
-`;
-
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
 });
 
+function filterMods(type) {
+    const rows = document.querySelectorAll("#modsBody tr");
+
+    rows.forEach(row => {
+        if (type === "ALL") {
+            row.style.display = "";
+        } else {
+            row.style.display = row.dataset.type === type ? "" : "none";
+        }
+    });
 }
-
-document.getElementById("search").addEventListener("input", render);
-
-loadMods();
-
-// auto refresh (sync)
-setInterval(loadMods, 15000);
-
 </script>
 
 </body>
