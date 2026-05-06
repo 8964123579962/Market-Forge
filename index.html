@@ -1,183 +1,188 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marketplace Mods</title>
+<title>MARKET Forge</title>
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-    }
-
-    body {
-        background: #0d1117;
-        color: white;
-        padding: 20px;
-    }
-
-    h1 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #58a6ff;
-    }
-
-    .search-box {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    input {
-        width: 80%;
-        max-width: 500px;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        outline: none;
-        font-size: 16px;
-    }
-
-    .filters {
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    .filters button {
-        background: #21262d;
-        color: white;
-        border: none;
-        padding: 10px 16px;
-        margin: 5px;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-
-    .filters button:hover {
-        background: #58a6ff;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        background: #161b22;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    th, td {
-        padding: 14px;
-        text-align: center;
-        border-bottom: 1px solid #30363d;
-    }
-
-    th {
-        background: #21262d;
-    }
-
-    a {
-        color: #58a6ff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    @media(max-width:768px){
-        table {
-            font-size: 12px;
-        }
-    }
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0b0f14;
+  color:white;
+}
+header {
+  background:#111827;
+  padding:20px;
+  text-align:center;
+  font-size:28px;
+  font-weight:bold;
+  color:#00d4ff;
+}
+.container {
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+.search {
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+.mods-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+.mod-card {
+  background:#161b22;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 0 10px rgba(0,0,0,0.4);
+}
+.mod-card h3 {
+  margin-top:0;
+}
+.btn {
+  display:inline-block;
+  margin-top:10px;
+  padding:10px 15px;
+  background:#00d4ff;
+  color:black;
+  text-decoration:none;
+  border-radius:8px;
+  font-weight:bold;
+}
+.admin-panel {
+  display:none;
+  background:#111827;
+  padding:20px;
+  margin-top:30px;
+  border-radius:12px;
+}
+input, textarea {
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+  border:none;
+  border-radius:8px;
+}
+button {
+  padding:10px 15px;
+  background:#00d4ff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
 </style>
 </head>
-<body>
+<body><header>MARKET Forge</header><div class="container">
+  <input type="text" id="search" class="search" placeholder="Search mods...">  <div class="mods-grid" id="modsContainer">
+    <!-- Mods appear here -->
+  </div>  <div style="margin-top:20px;">
+    <button onclick="showAdminLogin()">Admin Login</button>
+  </div>  <div class="admin-panel" id="adminPanel">
+    <h2>Admin Upload Panel</h2><input type="text" id="marketplaceLink" placeholder="Paste Marketplace Link First">
+<button onclick="fetchMarketplaceDetails()">Fetch Mod Details</button>
 
-<h1>Marketplace Mods</h1>
+<input type="text" id="modName" placeholder="Auto-filled Mod Name" readonly>
+<textarea id="modDesc" placeholder="Auto-filled Mod Description" readonly></textarea>
 
-<div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search mods...">
-</div>
+<input type="text" id="mediafireLink" placeholder="MediaFire Download Link">
 
-<div class="filters">
-    <button onclick="filterMods('ALL')">ALL</button>
-    <button onclick="filterMods('ADD-ONS')">ADD-ONS</button>
-    <button onclick="filterMods('TEXTURES')">TEXTURES</button>
-    <button onclick="filterMods('WORLDS')">WORLDS</button>
-    <button onclick="filterMods('SKINS')">SKINS</button>
-</div>
+<button onclick="addMod()">Post Mod</button>
 
-<table id="modsTable">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Size</th>
-            <th>Download</th>
-            <th>Marketplace</th>
-        </tr>
-    </thead>
-    <tbody id="modsBody">
-        <tr data-type="ADD-ONS">
-            <td>Dragon Expansion</td>
-            <td>ADD-ONS</td>
-            <td>25MB</td>
-            <td><a href="#">Download</a></td>
-            <td><a href="#">Marketplace</a></td>
-        </tr>
+  </div>
+</div><script>
+const ADMIN_PASSWORD = "marketforgeadmin123";
 
-        <tr data-type="TEXTURES">
-            <td>Ultra HD Texture Pack</td>
-            <td>TEXTURES</td>
-            <td>45MB</td>
-            <td><a href="#">Download</a></td>
-            <td><a href="#">Marketplace</a></td>
-        </tr>
+function showAdminLogin(){
+  const pass = prompt("Enter admin password:");
 
-        <tr data-type="WORLDS">
-            <td>Survival Kingdom</td>
-            <td>WORLDS</td>
-            <td>80MB</td>
-            <td><a href="#">Download</a></td>
-            <td><a href="#">Marketplace</a></td>
-        </tr>
+  if(pass === ADMIN_PASSWORD){
+    document.getElementById("adminPanel").style.display = "block";
+  } else {
+    alert("Wrong password.");
+  }
+}
 
-        <tr data-type="SKINS">
-            <td>Anime Skin Pack</td>
-            <td>SKINS</td>
-            <td>12MB</td>
-            <td><a href="#">Download</a></td>
-            <td><a href="#">Marketplace</a></td>
-        </tr>
-    </tbody>
-</table>
+async function fetchMarketplaceDetails(){
+  const link = document.getElementById("marketplaceLink").value;
 
-<script>
-const searchInput = document.getElementById("searchInput");
+  if(!link){
+    alert("Paste a marketplace link first.");
+    return;
+  }
 
-searchInput.addEventListener("keyup", function () {
-    const filter = searchInput.value.toLowerCase();
-    const rows = document.querySelectorAll("#modsBody tr");
+  try {
+    // Replace this URL with your backend/API later
+    const response = await fetch(`https://your-api.com/fetch?url=${encodeURIComponent(link)}`);
+    const data = await response.json();
 
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(filter) ? "" : "none";
-    });
+    document.getElementById("modName").value = data.name || "Unknown Mod";
+    document.getElementById("modDesc").value = data.description || "No description found.";
+
+  } catch (error) {
+    alert("Auto fetch failed. Marketplace blocks direct scraping from browser. You need a backend scraper/API.");
+    console.log(error);
+  }
+}
+
+function addMod(){
+  const name = document.getElementById("modName").value;
+  const desc = document.getElementById("modDesc").value;
+  const mediafire = document.getElementById("mediafireLink").value;
+  const marketplace = document.getElementById("marketplaceLink").value;
+
+  if(!name || !mediafire || !marketplace){
+    alert("Fetch marketplace details first.");
+    return;
+  }
+
+  const mod = {name, desc, mediafire, marketplace};
+
+  let mods = JSON.parse(localStorage.getItem("mods")) || [];
+  mods.push(mod);
+  localStorage.setItem("mods", JSON.stringify(mods));
+
+  renderMods();
+
+  document.getElementById("modName").value = "";
+  document.getElementById("modDesc").value = "";
+  document.getElementById("mediafireLink").value = "";
+  document.getElementById("marketplaceLink").value = "";
+}
+
+function renderMods(){
+  const container = document.getElementById("modsContainer");
+  const mods = JSON.parse(localStorage.getItem("mods")) || [];
+
+  container.innerHTML = "";
+
+  mods.forEach(mod => {
+    container.innerHTML += `
+      <div class="mod-card">
+        <h3>${mod.name}</h3>
+        <p>${mod.desc}</p>
+        <a class="btn" href="${mod.mediafire}" target="_blank">Download</a>
+        <a class="btn" href="${mod.marketplace}" target="_blank">Marketplace</a>
+      </div>
+    `;
+  });
+}
+
+
+document.getElementById("search").addEventListener("input", function(){
+  const search = this.value.toLowerCase();
+  const cards = document.querySelectorAll(".mod-card");
+
+  cards.forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(search) ? "block" : "none";
+  });
 });
 
-function filterMods(type) {
-    const rows = document.querySelectorAll("#modsBody tr");
-
-    rows.forEach(row => {
-        if (type === "ALL") {
-            row.style.display = "";
-        } else {
-            row.style.display = row.dataset.type === type ? "" : "none";
-        }
-    });
-}
-</script>
-
-</body>
+renderMods();
+</script></body>
 </html>
