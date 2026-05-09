@@ -1,0 +1,14 @@
+{
+  "name": "marketforge",
+  "version": "1.0.0",
+  "description": "MarketForge — Minecraft Marketplace Browser",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
