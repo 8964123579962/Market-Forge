@@ -1,1 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarketForge — Minecraft Marketplace Browser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET & VARIABLES ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --yellow:        #F9C23C;
+      --yellow-bright: #FFD34E;
+      --yellow-muted:  #C4962A;
+      --yellow-glow:   rgba(249,194,60,0.18);
+      --yellow-dim:    rgba(249,194,60,0.08);
+
+      --bg:            #0D0D0F;
+      --bg2:           #131316;
+      --bg3:           #1A1A1F;
+      --bg4:           #222228;
+      --border:        rgba(249,194,60,0.12);
+      --border-hover:  rgba(249,194,60,0.35);
+
+      --text:          #F0EEE8;
+      --text-muted:    #8A877F;
+      --text-dim:      #4A4845;
+
+      --green:         #4ADE80;
+      --red:           #F87171;
+      --blue:          #60A5FA;
+
+      --radius:        10px;
+      --radius-lg:     16px;
+      --radius-xl:     24px;
+
+      --font-display:  'Syne', sans-serif;
+      --font-mono:     'JetBrains Mono', monospace;
+      --font-body:     'Inter', sans-serif;
+
+      --transition:    0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-card:   0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+      --shadow-hover:  0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px var(--border-hover), 0 0 24px var(--yellow-glow);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NOISE OVERLAY ─────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── NAVBAR ────────────────────────────────────────────────── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,13,15,0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex; align-items: center; gap: 24px;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--yellow);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px rgba(249,194,60,0.4);
+    }
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 20px; font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .logo-text span { color: var(--yellow); }
+
+    .nav-search {
+      flex: 1; max-width: 480px;
+      position: relative;
+    }
+    .nav-search input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 40px 8px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .nav-search input::placeholder { color: var(--text-dim); }
+    .nav-search input:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px var(--yellow-glow);
+    }
+    .nav-search .search-icon {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim); pointer-events: none; font-size: 14px;
+    }
+
+    .nav-stats {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-muted);
+    }
+    .nav-stats .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── HERO ──────────────────────────────────────────────────── */
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 72px 24px 56px;
+      text-align: center;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(249,194,60,0.08) 0%, transparent 70%);
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--yellow-dim);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      color: var(--yellow);
+      letter-spacing: 0.05em; text-transform: uppercase;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 6vw, 72px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      color: var(--text);
+      margin-bottom: 16px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--yellow);
+      text-shadow: 0 0 40px rgba(249,194,60,0.4);
+    }
+    .hero p {
+      font-size: 16px; color: var(--text-muted);
+      max-width: 480px; margin: 0 auto 40px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    /* ── FILTER BAR ────────────────────────────────────────────── */
+    .filter-bar {
+      max-width: 1200px; margin: 0 auto 32px;
+      padding: 0 24px;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .filter-label {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
+      margin-right: 4px;
+    }
+
+    .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .chip {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 12px;
+      font-size: 12px; font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+    .chip:hover {
+      border-color: var(--yellow-muted);
+      color: var(--yellow);
+      background: var(--yellow-dim);
+    }
+    .chip.active {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: var(--bg);
+      font-weight: 700;
+    }
+
+    .sort-select {
+      margin-left: auto;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 28px 6px 12px;
+      font-size: 12px; font-family: var(--font-body);
+      color: var(--text-muted);
+      cursor: pointer; outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A877F' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: var(--transition);
+    }
+    .sort-select:hover, .sort-select:focus {
+      border-color: var(--yellow); color: var(--text);
+    }
+
+    /* ── MAIN LAYOUT ───────────────────────────────────────────── */
+    .main {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── SECTION HEADER ─────────────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 700;
+      color: var(--text);
+    }
+    .section-count {
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ── MOD GRID ──────────────────────────────────────────────── */
+    .mod-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── MOD CARD ──────────────────────────────────────────────── */
+    .mod-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      animation: fadeUp 0.5s ease both;
+      display: flex; flex-direction: column;
+    }
+    .mod-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--border-hover);
+    }
+
+    .mod-card-banner {
+      height: 140px;
+      background: var(--bg3);
+      position: relative; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .mod-card-banner img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .mod-card:hover .mod-card-banner img { transform: scale(1.05); }
+    .mod-card-banner .banner-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+      background: linear-gradient(135deg, var(--bg3) 0%, var(--bg4) 100%);
+    }
+    .mod-card-banner .category-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(13,13,15,0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 10px; font-weight: 600; font-family: var(--font-mono);
+      color: var(--yellow);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .mod-card-banner .price-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--yellow);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px; font-weight: 700; font-family: var(--font-mono);
+      color: var(--bg);
+    }
+    .mod-card-banner .price-badge.free {
+      background: var(--green);
+    }
+
+    .mod-card-body {
+      padding: 14px 16px 16px;
+      flex: 1; display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .mod-card-name {
+      font-family: var(--font-display);
+      font-size: 15px; font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .mod-card-meta {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .mod-card-studio {
+      display: flex; align-items: center; gap: 4px;
+      overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+    .meta-sep { color: var(--text-dim); }
+
+    .mod-card-desc {
+      font-size: 12px; color: var(--text-muted); line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .mod-card-footer {
+      display: flex; align-items: center; gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    .stars {
+      display: flex; align-items: center; gap: 3px;
+      font-size: 11px;
+    }
+    .star-filled { color: var(--yellow); }
+    .star-empty  { color: var(--text-dim); }
+    .rating-num  { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+
+    .tag-list {
+      display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto;
+    }
+    .tag {
+      background: var(--bg4);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 10px; color: var(--text-muted);
+    }
+
+    /* ── MODAL ─────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open {
+      opacity: 1; pointer-events: all;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      width: 100%; max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.95) translateY(8px);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg4) transparent;
+    }
+    .modal-overlay.open .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-banner {
+      height: 220px; position: relative; overflow: hidden;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+    .modal-banner img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .modal-banner .banner-placeholder-lg {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 72px;
+      background: linear-gradient(135deg, var(--bg3) 0%, var(--bg4) 100%);
+    }
+    .modal-banner-close {
+      position: absolute; top: 14px; right: 14px;
+      width: 32px; height: 32px;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text); font-size: 16px;
+      transition: var(--transition);
+    }
+    .modal-banner-close:hover { background: rgba(249,194,60,0.2); color: var(--yellow); }
+
+    .modal-body { padding: 24px; }
+
+    .modal-header { margin-bottom: 20px; }
+    .modal-category {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+      color: var(--yellow); text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .modal-name {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 800; line-height: 1.1;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .modal-studio {
+      font-size: 13px; color: var(--text-muted);
+    }
+    .modal-studio strong { color: var(--text); }
+
+    .modal-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px; margin: 20px 0;
+    }
+    .stat-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+    .stat-box-label {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 4px;
+    }
+    .stat-box-value {
+      font-family: var(--font-display); font-size: 16px; font-weight: 700;
+      color: var(--text);
+    }
+    .stat-box-value.yellow { color: var(--yellow); }
+    .stat-box-value.green  { color: var(--green); }
+
+    .modal-desc {
+      font-size: 14px; color: var(--text-muted); line-height: 1.65;
+      margin-bottom: 20px;
+      border-left: 3px solid var(--yellow);
+      padding-left: 14px;
+    }
+
+    .modal-tags {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-bottom: 24px;
+    }
+    .modal-tag {
+      background: var(--bg4);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px; color: var(--text-muted);
+      transition: var(--transition);
+    }
+    .modal-tag:hover { border-color: var(--yellow-muted); color: var(--yellow); cursor: pointer; }
+
+    .modal-actions {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 13px; font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer; text-decoration: none;
+      transition: var(--transition);
+      border: none;
+    }
+    .btn-primary {
+      background: var(--yellow); color: var(--bg);
+    }
+    .btn-primary:hover {
+      background: var(--yellow-bright);
+      box-shadow: 0 0 20px rgba(249,194,60,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      border-color: var(--yellow-muted); color: var(--yellow);
+      background: var(--yellow-dim);
+    }
+
+    /* ── LOADING ───────────────────────────────────────────────── */
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .skeleton {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: shimmer 1.8s ease infinite;
+    }
+    .skeleton-banner { height: 140px; background: var(--bg3); }
+    .skeleton-body { padding: 14px 16px; }
+    .skeleton-line {
+      height: 12px; border-radius: 4px;
+      background: var(--bg4);
+      margin-bottom: 8px;
+    }
+    .skeleton-line.w-80 { width: 80%; }
+    .skeleton-line.w-60 { width: 60%; }
+    .skeleton-line.w-40 { width: 40%; }
+    @keyframes shimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ── EMPTY / ERROR STATES ──────────────────────────────────── */
+    .state-box {
+      text-align: center; padding: 80px 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .state-icon { font-size: 48px; opacity: 0.4; }
+    .state-title {
+      font-family: var(--font-display); font-size: 20px; font-weight: 700;
+      color: var(--text-muted);
+    }
+    .state-sub { font-size: 13px; color: var(--text-dim); max-width: 320px; }
+
+    /* ── FOOTER ────────────────────────────────────────────────── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      font-size: 12px; color: var(--text-dim);
+    }
+    .footer-logo {
+      font-family: var(--font-display); font-size: 14px; font-weight: 700;
+      color: var(--text-muted);
+    }
+    .footer-logo span { color: var(--yellow); }
+
+    /* ── ANIMATIONS ────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SCROLLBAR ─────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+    /* ── RESPONSIVE ────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .navbar { padding: 0 16px; gap: 12px; }
+      .nav-search { max-width: 200px; }
+      .hero { padding: 48px 16px 36px; }
+      .main { padding: 0 16px 60px; }
+      .filter-bar { padding: 0 16px; }
+      .modal-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ──────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <a href="#" class="logo">
+      <div class="logo-icon">⚒️</div>
+      <span class="logo-text">Market<span>Forge</span></span>
+    </a>
+    <div class="nav-search">
+      <input type="text" id="searchInput" placeholder="Search mods, studios, genres…" autocomplete="off" />
+      <span class="search-icon">⌕</span>
+    </div>
+    <div class="nav-stats">
+      <div class="dot"></div>
+      <span id="navCount">Loading…</span>
+    </div>
+  </nav>
+
+  <!-- ── HERO ────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-eyebrow">⚒️ Minecraft Marketplace</div>
+    <h1>Browse <em>Mods</em><br>Built for Bedrock</h1>
+    <p>Discover skin packs, worlds, texture packs and add-ons — all synced live from the MarketForge database.</p>
+  </section>
+
+  <!-- ── FILTER BAR ───────────────────────────────────────────── -->
+  <div class="filter-bar">
+    <span class="filter-label">Type</span>
+    <div class="chip-group" id="categoryChips">
+      <div class="chip active" data-cat="">All</div>
+      <div class="chip" data-cat="Skin Pack">Skin Packs</div>
+      <div class="chip" data-cat="World">Worlds</div>
+      <div class="chip" data-cat="Texture Pack">Textures</div>
+      <div class="chip" data-cat="Add-On">Add-Ons</div>
+      <div class="chip" data-cat="Mash-Up">Mash-Ups</div>
+    </div>
+    <div class="chip-group" id="priceChips" style="margin-left: 16px;">
+      <span class="filter-label">Price</span>
+      <div class="chip active" data-price="">Any</div>
+      <div class="chip" data-price="free">Free</div>
+      <div class="chip" data-price="paid">Paid</div>
+    </div>
+    <select class="sort-select" id="sortSelect">
+      <option value="default">Sort: Default</option>
+      <option value="name">Name A→Z</option>
+      <option value="rating">Top Rated</option>
+      <option value="price_asc">Cheapest</option>
+      <option value="price_desc">Most Expensive</option>
+      <option value="newest">Newest</option>
+    </select>
+  </div>
+
+  <!-- ── MAIN ─────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="section-header">
+      <span class="section-title" id="sectionTitle">All Mods</span>
+      <span class="section-count" id="sectionCount"></span>
+    </div>
+    <div id="gridContainer">
+      <!-- skeleton loaders -->
+      <div class="loading-grid" id="skeletons">
+        ${Array(12).fill(0).map(() => `
+          <div class="skeleton">
+            <div class="skeleton-banner"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line w-80"></div>
+              <div class="skeleton-line w-60"></div>
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line w-40"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="mod-grid" id="modGrid" style="display:none;"></div>
+      <div class="state-box" id="emptyState" style="display:none;">
+        <div class="state-icon">🔍</div>
+        <div class="state-title">No mods found</div>
+        <div class="state-sub">Try adjusting your search or filters.</div>
+      </div>
+      <div class="state-box" id="errorState" style="display:none;">
+        <div class="state-icon">⚠️</div>
+        <div class="state-title">Could not load mods</div>
+        <div class="state-sub" id="errorMsg">Check your Netlify environment variables (DISCORD_BOT_TOKEN and DATABASE_CHANNEL_ID).</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── MODAL ─────────────────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-banner" id="modalBanner"></div>
+      <div class="modal-body">
+        <div class="modal-header">
+          <div class="modal-category" id="modalCategory"></div>
+          <div class="modal-name"     id="modalName"></div>
+          <div class="modal-studio"   id="modalStudio"></div>
+        </div>
+        <div class="modal-stats" id="modalStats"></div>
+        <div class="modal-desc"  id="modalDesc"></div>
+        <div class="modal-tags"  id="modalTags"></div>
+        <div class="modal-actions" id="modalActions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-logo">Market<span>Forge</span></div>
+    <div>Synced from Discord · Minecraft Marketplace Database</div>
+    <div id="footerTime"></div>
+  </footer>
+
+  <script>
+    // ─── STATE ───────────────────────────────────────────────────
+    let allMods = [];
+    let filtered = [];
+    let activeCategory = '';
+    let activePrice = '';
+    let activeSort = 'default';
+    let searchQuery = '';
+    let fetchedAt = null;
+
+    // ─── CATEGORY EMOJI MAP ──────────────────────────────────────
+    const CAT_EMOJI = {
+      'Skin Pack':    '👤',
+      'World':        '🌍',
+      'Texture Pack': '🎨',
+      'Add-On':       '🔧',
+      'Mash-Up':      '✨',
+      'DLC':          '📦',
+    };
+
+    // ─── FETCH MODS ──────────────────────────────────────────────
+    async function loadMods() {
+      try {
+        const res = await fetch('/.netlify/functions/mods');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        allMods = data.mods || [];
+        fetchedAt = data.fetched_at;
+
+        document.getElementById('navCount').textContent = `${allMods.length} mods`;
+        document.getElementById('footerTime').textContent =
+          `Last synced: ${fetchedAt ? new Date(fetchedAt).toLocaleString() : 'just now'}`;
+
+        document.getElementById('skeletons').style.display = 'none';
+        document.getElementById('modGrid').style.display = '';
+
+        applyFilters();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('skeletons').style.display = 'none';
+        document.getElementById('errorMsg').textContent = err.message;
+        document.getElementById('errorState').style.display = 'flex';
+      }
+    }
+
+    // ─── FILTERS & SORT ──────────────────────────────────────────
+    function applyFilters() {
+      let list = [...allMods];
+
+      // Search
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(m =>
+          m.name.toLowerCase().includes(q) ||
+          m.studio.toLowerCase().includes(q) ||
+          m.description.toLowerCase().includes(q) ||
+          m.genre.toLowerCase().includes(q) ||
+          m.tags.some(t => t.toLowerCase().includes(q))
+        );
+      }
+
+      // Category
+      if (activeCategory) {
+        list = list.filter(m =>
+          m.category.toLowerCase().includes(activeCategory.toLowerCase())
+        );
+      }
+
+      // Price
+      if (activePrice === 'free')  list = list.filter(m => m.price_int === 0);
+      if (activePrice === 'paid')  list = list.filter(m => m.price_int  > 0);
+
+      // Sort
+      if (activeSort === 'name')        list.sort((a,b) => a.name.localeCompare(b.name));
+      if (activeSort === 'rating')      list.sort((a,b) => b.rating - a.rating);
+      if (activeSort === 'price_asc')   list.sort((a,b) => a.price_int - b.price_int);
+      if (activeSort === 'price_desc')  list.sort((a,b) => b.price_int - a.price_int);
+      if (activeSort === 'newest')      list.sort((a,b) => b.added_at.localeCompare(a.added_at));
+
+      filtered = list;
+      renderGrid();
+    }
+
+    // ─── RENDER ──────────────────────────────────────────────────
+    function renderGrid() {
+      const grid = document.getElementById('modGrid');
+      const empty = document.getElementById('emptyState');
+      const title = document.getElementById('sectionTitle');
+      const count = document.getElementById('sectionCount');
+
+      if (!filtered.length) {
+        grid.style.display = 'none';
+        empty.style.display = 'flex';
+        count.textContent = '';
+        return;
+      }
+
+      empty.style.display = 'none';
+      grid.style.display = 'grid';
+      count.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+
+      if (activeCategory) title.textContent = activeCategory + 's';
+      else if (searchQuery) title.textContent = `Results for "${searchQuery}"`;
+      else title.textContent = 'All Mods';
+
+      grid.innerHTML = filtered.map((mod, i) => renderCard(mod, i)).join('');
+
+      // Attach click events
+      grid.querySelectorAll('.mod-card').forEach((el, i) => {
+        el.addEventListener('click', () => openModal(filtered[i]));
+      });
+    }
+
+    function renderCard(mod, i) {
+      const emoji = CAT_EMOJI[mod.category] || '📦';
+      const stars  = renderStars(mod.rating);
+      const delay  = Math.min(i * 30, 400);
+      const isFree = mod.price_int === 0;
+      const priceLabel = !mod.price ? '' :
+        isFree ? 'Free' : mod.price;
+
+      return `
+        <div class="mod-card" style="animation-delay:${delay}ms">
+          <div class="mod-card-banner">
+            ${mod.image_url
+              ? `<img src="${esc(mod.image_url)}" alt="${esc(mod.name)}" loading="lazy" />`
+              : `<div class="banner-placeholder">${emoji}</div>`
+            }
+            ${mod.category ? `<span class="category-badge">${esc(mod.category)}</span>` : ''}
+            ${priceLabel    ? `<span class="price-badge${isFree ? ' free' : ''}">${esc(priceLabel)}</span>` : ''}
+          </div>
+          <div class="mod-card-body">
+            <div class="mod-card-name">${esc(mod.name)}</div>
+            <div class="mod-card-meta">
+              ${mod.studio ? `<span class="mod-card-studio">🏗️ ${esc(mod.studio)}</span>` : ''}
+              ${mod.genre  ? `<span class="meta-sep">·</span><span>${esc(mod.genre)}</span>` : ''}
+            </div>
+            ${mod.description ? `<div class="mod-card-desc">${esc(mod.description)}</div>` : ''}
+            <div class="mod-card-footer">
+              <div class="stars">
+                ${stars}
+                ${mod.rating ? `<span class="rating-num">${mod.rating.toFixed(1)}</span>` : ''}
+              </div>
+              <div class="tag-list">
+                ${mod.tags.slice(0,2).map(t => `<span class="tag">${esc(t)}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStars(rating) {
+      const filled = Math.round(rating);
+      return Array.from({length: 5}, (_, i) =>
+        `<span class="${i < filled ? 'star-filled' : 'star-empty'}">★</span>`
+      ).join('');
+    }
+
+    // ─── MODAL ───────────────────────────────────────────────────
+    function openModal(mod) {
+      const overlay = document.getElementById('modalOverlay');
+      const emoji = CAT_EMOJI[mod.category] || '📦';
+      const isFree = mod.price_int === 0;
+
+      // Banner
+      document.getElementById('modalBanner').innerHTML = `
+        ${mod.image_url
+          ? `<img src="${esc(mod.image_url)}" alt="${esc(mod.name)}" />`
+          : `<div class="banner-placeholder-lg">${emoji}</div>`
+        }
+        <button class="modal-banner-close" id="modalClose">✕</button>
+      `;
+
+      document.getElementById('modalCategory').textContent = mod.category || 'Mod';
+      document.getElementById('modalName').textContent     = mod.name;
+      document.getElementById('modalStudio').innerHTML     = mod.studio
+        ? `by <strong>${esc(mod.studio)}</strong>` : '';
+
+      // Stats
+      const stats = [];
+      if (mod.price)  stats.push({ label: 'Price', value: mod.price, cls: isFree ? 'green' : 'yellow' });
+      if (mod.rating) stats.push({ label: 'Rating', value: `${mod.rating.toFixed(1)}/5`, cls: 'yellow' });
+      if (mod.genre)  stats.push({ label: 'Genre',  value: mod.genre, cls: '' });
+      if (mod.contents) stats.push({ label: 'Contents', value: mod.contents, cls: '' });
+
+      document.getElementById('modalStats').innerHTML = stats.map(s => `
+        <div class="stat-box">
+          <div class="stat-box-label">${esc(s.label)}</div>
+          <div class="stat-box-value ${s.cls}">${esc(s.value)}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('modalDesc').textContent = mod.description || 'No description available.';
+
+      document.getElementById('modalTags').innerHTML = mod.tags.map(t =>
+        `<span class="modal-tag">${esc(t)}</span>`
+      ).join('');
+
+      // Actions
+      const actions = [];
+      if (mod.download_url) {
+        actions.push(`<a class="btn btn-primary" href="${esc(mod.download_url)}" target="_blank" rel="noopener">⬇ Download</a>`);
+      }
+      if (mod.marketplace_url) {
+        actions.push(`<a class="btn btn-secondary" href="${esc(mod.marketplace_url)}" target="_blank" rel="noopener">🌐 Marketplace</a>`);
+      }
+      document.getElementById('modalActions').innerHTML = actions.join('');
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      document.getElementById('modalClose').addEventListener('click', closeModal);
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // ─── SEARCH ──────────────────────────────────────────────────
+    let searchTimer;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        searchQuery = e.target.value.trim();
+        applyFilters();
+      }, 200);
+    });
+
+    // ─── CATEGORY CHIPS ──────────────────────────────────────────
+    document.getElementById('categoryChips').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.querySelectorAll('#categoryChips .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeCategory = chip.dataset.cat;
+      applyFilters();
+    });
+
+    // ─── PRICE CHIPS ─────────────────────────────────────────────
+    document.getElementById('priceChips').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.querySelectorAll('#priceChips .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activePrice = chip.dataset.price;
+      applyFilters();
+    });
+
+    // ─── SORT ────────────────────────────────────────────────────
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      activeSort = e.target.value;
+      applyFilters();
+    });
+
+    // ─── HELPERS ─────────────────────────────────────────────────
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────
+    loadMods();
+  </script>
+</body>
+</html>
